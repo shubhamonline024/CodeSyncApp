@@ -174,6 +174,38 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });
+
+  socket.on("disconnecting", () => {
+    for (const noteId of socket.rooms) {
+      // Skip the socket's own room
+      if (noteId === socket.id) continue;
+
+      // Delay so the adapter updates rooms before checking
+      setTimeout(async () => {
+        const room = io.sockets.adapter.rooms.get(noteId);
+
+        if (!room || room.size === 0) {
+          console.log(`Room ${noteId} is now empty.`);
+
+          // Clear existing timer if any
+          if (saveTimers.has(noteId)) {
+            clearTimeout(saveTimers.get(noteId));
+            saveTimers.delete(noteId);
+          }
+
+          const noteData = pendingNotes.get(noteId);
+          if (noteData) {
+            try {
+              await saveNoteToSupabase(noteId, noteData);
+              console.log(`Saved note ${noteId} to Supabase.`);
+            } catch (err) {
+              console.error(`Failed to save note ${noteId}:`, err);
+            }
+          }
+        }
+      }, 0);
+    }
+  });
 });
 
 // Routes
