@@ -14,6 +14,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const styles = {
   headingContainer: {
@@ -29,7 +30,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
   },
-  dataGridContainer: { mt: 2 },
+  dataGridContainer: {
+    mt: 2,
+  },
   dataGrid: {
     cursor: "pointer",
     "& .MuiDataGrid-cell": {
@@ -39,6 +42,12 @@ const styles = {
     },
   },
   addBtn: {},
+  circularLoader: {
+    height: 500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 };
 
 const Home = () => {
@@ -116,70 +125,78 @@ const Home = () => {
   return (
     <>
       <NavBar user={user} />
-      <Container>
-        <Container sx={styles.headingContainer}>
-          <Box sx={styles.leftSection}>
-            <TextField
-              id="standard-basic"
-              placeholder="Search"
-              variant="standard"
-              sx={{ width: 300 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <ClearRoundedIcon />
-                  </InputAdornment>
-                ),
+      {backendActive ? (
+        <Container>
+          <Container sx={styles.headingContainer}>
+            <Box sx={styles.leftSection}>
+              <TextField
+                id="standard-basic"
+                placeholder="Search"
+                variant="standard"
+                sx={{ width: 300 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <ClearRoundedIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+            <Box sx={styles.rightSection}>
+              {backendActive ? (
+                <CloudIcon fontSize="small" sx={{ color: "#107C10" }} />
+              ) : (
+                <CloudOffIcon fontSize="small" />
+              )}
+              <Divider
+                orientation="vertical"
+                variant="middle"
+                flexItem
+                sx={{ ml: 2 }}
+              />
+              <IconButton
+                color="primary"
+                onClick={createNewNote}
+                sx={styles.addBtn}
+              >
+                <AddCircleRoundedIcon fontSize="large" />
+              </IconButton>
+            </Box>
+          </Container>
+          <Container sx={styles.dataGridContainer}>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              getRowHeight={() => "auto"}
+              onRowClick={(params) => {
+                window.open(params.row.url, "_blank");
               }}
-            />
-          </Box>
-          <Box sx={styles.rightSection}>
-            {backendActive ? (
-              <CloudIcon fontSize="small" sx={{ color: "#107C10" }} />
-            ) : (
-              <CloudOffIcon fontSize="small" />
-            )}
-            <Divider
-              orientation="vertical"
-              variant="middle"
-              flexItem
-              sx={{ ml: 2 }}
-            />
-            <IconButton
-              color="primary"
-              onClick={createNewNote}
-              sx={styles.addBtn}
-            >
-              <AddCircleRoundedIcon fontSize="large" />
-            </IconButton>
-          </Box>
-        </Container>
-        <Container sx={styles.dataGridContainer}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            getRowHeight={() => "auto"}
-            onRowClick={(params) => {
-              window.open(params.row.url, "_blank");
-            }}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 5,
+                  },
                 },
-              },
-            }}
-            pageSizeOptions={[5, 10, 15, 20]}
-            sx={styles.dataGrid}
-            disableRowSelectionOnClick
-          />
+              }}
+              pageSizeOptions={[5, 10, 15, 20]}
+              sx={styles.dataGrid}
+              disableRowSelectionOnClick
+            />
+          </Container>
         </Container>
-      </Container>
+      ) : (
+        <Container>
+          <Box sx={styles.circularLoader}>
+            <CircularProgress size="3rem" />
+          </Box>
+        </Container>
+      )}
     </>
   );
 };
